@@ -2,12 +2,13 @@ import mysql.connector
 import datetime
 now = datetime.datetime.now()
 mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stock")
-mycursor=mydb.cursor()
+mycursor=mydb.cursor(buffered=True)
+
 def create_database():
     
 
     mydb = mysql.connector.connect(host='localhost',user='root',password='root',database='stock')  # change as per system
-    mycursor = mydb.cursor()
+    mycursor = mydb.cursor()   
     sql = \
         "CREATE TABLE if not exists product (\
                   pcode int(10) PRIMARY KEY,\
@@ -61,8 +62,12 @@ while True:
         sql="INSERT INTO user values (%s,%s,%s);"
         val=(uid,name,paswd)
         mycursor.execute(sql,val)
+        '''sql="select uid from user where uid=%s;"
+        val=(uid,)'''
+        
         mydb.commit()
         print(mycursor.rowcount, " user created")
+        
         
         break
     if ask=="2":
@@ -105,7 +110,7 @@ def sales_mgmt( ):
                       if s== 1 :
                                  saleitem()
                       if s== 2 :
-                                 list_sale()
+                                 sale()
                       if s== 3 :
                                  break
 
@@ -131,26 +136,27 @@ def modifyproduct():
         code=int(input("Enter the product code :"))
         if ask==1:
             name=input("enter the new name:")
-            sql="UPDATE product SET productname=%s where pcode=%s;"
+            sql="UPDATE product SET pname=%s where pcode=%s;"
             val=(name,code)
             mycursor.execute(sql,val)
             mydb.commit()
             print("\t\t Product details updated")
-            if ask==2:
-                qty=int(input("Enter the quantity :"))
-                sql="UPDATE product SET pqty=%s where pcode=%s;"
-                val=(qty,code)
-                mycursor.execute(sql,val)
-                mydb.commit()
-                print("\t\t Product details updated")
-                if ask==3:
-                    price=int(input("enter the price"))
-                    sql="UPDATE product SET pprice=%s where pcode=%s;"
-                    val=(price,code)
-                    mycursor.execute(sql,val)
-                    print("\t\t Product details updated")
-                    if ask==4:
-                        break
+        if ask==2:
+            qty=int(input("Enter the quantity :"))
+            sql="UPDATE product SET pqty=%s where pcode=%s;"
+            val=(qty,code)
+            mycursor.execute(sql,val)
+            mydb.commit()
+            print("\t\t Product details updated")
+        if ask==3:
+            price=int(input("enter the price"))
+            sql="UPDATE product SET pprice=%s where pcode=%s;"
+            val=(price,code)
+            mycursor.execute(sql,val)
+            print("\t\t Product details updated")
+            mydb.commit()
+        if ask==4:
+            break
 def deleteproduct():
            mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
            mycursor=mydb.cursor()
@@ -164,7 +170,7 @@ def deleteproduct():
 def listproduct():
            mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
            mycursor=mydb.cursor()
-           sql="SELECT * from product"
+           sql="SELECT * from product;"
            mycursor.execute(sql)
            print("\t\t\t\t PRODUCT DETAILS")
            print("\t\t","-"*46)
@@ -174,35 +180,37 @@ def listproduct():
                       print("\t\t",i[0],"\t",i[1],"\t",i[2],"\t   ",i[3],"\t\t",i[4])
            print("\t\t","-"*46)
 def saleitem():
-           mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
+           mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stock")
            mycursor=mydb.cursor()
            pcode=input("Enter product code: ")
-           sql="SELECT count(*) from product WHERE pcode=%s;"
-           val=(pcode,)
-           mycursor.execute(sql,val)
+           sql4="SELECT count(*) from product WHERE pcode=%s;"
+           val4=(pcode,)
+           mycursor.execute(sql4,val4)
            qty=int(input("Enter no of quantity to sell :"))
-           sql="select pqty from product where pcode=%s"
-           mycursor.execute(sql,pcode)
+           '''sql5="select pqty from product where pcode=%s;"
+           val=(pcode,)
+           mycursor.execute(sql5,val)
            qtycheck=mycursor.fetchall()
+           
            if qtycheck<qty:
                print("Not enough quantity to sell")
                mydb.commmit()
-           else:               
-               price=int(input("enter the price in which each quantity is to be sold:"))
-               totalprice=price*qty
-               print("Collect Rs:",totalprice)
-               sql2="UPDATE product SET pqty=pqty-%s WHERE pcode=%s"      
-               val=(qty,pcode)
-               mycursor.execute(sql2,val)
-               mydb.commit()
-               print("successfully sold")
-               sql="select price from product where pcode=%s"
-               val=(pcode)
-               mycursor.execute(sql,val)
-               profitcheck=mycursor.fetchall()
-               profit=price-profitcheck
-               print("total profit" , profit)
-               sql="insert into sales values(salesid,saledate,pcode,pprice,pqty)
+           else:               '''
+           price=int(input("enter the price in which each quantity is to be sold:"))
+           totalprice=price*qty
+           print("Collect Rs:",totalprice)
+           sql2="UPDATE product SET pqty=pqty-%s WHERE pcode=%s;"      
+           val=(qty,pcode)
+           mycursor.execute(sql2,val)
+           print("successfully sold")
+           sql="select price from product where pcode=%s;"
+           val=(pcode,)
+           mycursor.execute(sql,val)
+           profitcheck=mycursor.fetchall()
+           profit=price-profitcheck
+           print("total profit" , profit)
+           sql="insert into sales values(salesid,saledate,pcode,pprice,pqty);"
+           mydb.commit()
                
 while True:
     print("\t\t\t STOCK MANAGEMENT")
@@ -218,6 +226,6 @@ while True:
         sales_mgmt()
     if n== 4:
         break
-                                  
+                       
     
     
