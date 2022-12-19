@@ -150,7 +150,7 @@ def saleitem():
            val=(pcode,)
            mycursor.execute(sql5,val)
            qtycheck=mycursor.fetchall()
-           print(qtycheck)
+           print("Original Price",qtycheck[0][0])
            for i in qtycheck:
                x=i
            for i in x:
