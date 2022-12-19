@@ -1,9 +1,9 @@
 import mysql.connector
-mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stock")
+mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stocks")
 mycursor=mydb.cursor(buffered=True)
 
 def create_database():
-    mydb = mysql.connector.connect(host='localhost',user='root',password='root',database='stock')  # change as per system
+    mydb = mysql.connector.connect(host='localhost',user='root',password='root',database='stocks')  # change as per system
     mycursor = mydb.cursor()
     mycursor.execute("CREATE TABLE if not exists product (pcode int(10) PRIMARY KEY,pname char(30) NOT NULL,pprice float(8,2) ,pqty int(10) ,pcat char(30));")
     mycursor.execute("CREATE TABLE if not exists orders (orderid int(6)PRIMARY KEY,orderdate DATE ,pcode char(30) NOT NULL ,pprice float(8,2) ,pqty int(10) ,supplier char(50),pcat char(30));")      
@@ -16,7 +16,7 @@ print("2.Login Account")
 ask=input("Enter Choice")
 while True:
     if ask=="1":
-        mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
+        mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
         mycursor=mydb.cursor()
         uid=input("Enter emaid id :")
         name=input(" Enter Name :")
@@ -24,14 +24,10 @@ while True:
         sql="INSERT INTO user values (%s,%s,%s);"
         val=(uid,name,paswd)
         mycursor.execute(sql,val)
-        '''sql="select uid from user where uid=%s;"
-        val=(uid,)'''
-        
-        mydb.commit()
-        print(mycursor.rowcount, " user created")    
+        mydb.commit()   
         break
     if ask=="2":
-        mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
+        mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
         mycursor=mydb.cursor()
         askemail=input("enter emailid")
         askpass=input("enter password")
@@ -79,17 +75,18 @@ def addproduct():
     pqty=int(input("enter the quantity to buy"))
     pprice=int(input("enter the price of the product"))
     pcat=input("enter category")
-    mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
+    mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
     mycursor=mydb.cursor()
     sql="insert into product values(%s,%s,%s,%s,%s);"
-    data=(pcode,pname,pqty,pprice,pcat)
+    data=(pcode,pname,pprice,pqty,pcat)
     mycursor.execute(sql,data)
     mydb.commit()
+    print("Product  Added")
 def modifyproduct():
     while True:
         print("Choose which data to be modified")
         print("1.Product Name")
-        print("2.Product Quantitity")
+        print("2.Product Quantity")
         print("3.Product Price")
         print("4.Back to Main Menu")
         ask=int(input("enter your choice"))
@@ -118,7 +115,7 @@ def modifyproduct():
         if ask==4:
             break
 def deleteproduct():
-           mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
+           mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
            mycursor=mydb.cursor()
            code=int(input("Enter the product code :"))
            sql="DELETE FROM product WHERE pcode = %s;"
@@ -128,7 +125,7 @@ def deleteproduct():
            print(mycursor.rowcount," record(s) deleted");
 
 def listproduct():
-           mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stock")
+           mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
            mycursor=mydb.cursor()
            sql="SELECT * from product;"
            mycursor.execute(sql)
@@ -140,7 +137,7 @@ def listproduct():
                       print("\t\t",i[0],"\t",i[1],"\t",i[2],"\t   ",i[3],"\t\t",i[4])
            print("\t\t","-"*46)
 def saleitem():
-           mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stock")
+           mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stocks")
            mycursor=mydb.cursor()
            pcode=input("Enter product code: ")
            sql4="SELECT * from product WHERE pcode=%s;"
@@ -160,7 +157,8 @@ def saleitem():
                l=i
            if l<qty:
               print("Not enough quantity to sell")
-           else:       
+           else:
+               salesid=int(input("enter sales id:"))
                price=int(input("enter the price in which each quantity is to be sold:"))
                totalprice=price*qty
                print("Collect Rs:",totalprice)
@@ -169,15 +167,12 @@ def saleitem():
                val=(qty,pcode)
                mycursor.execute(sql2,val)
                print("successfully sold")
-               salesid=int(input("enter sales id:"))
                sql="select pprice from product where pcode=%s;" 
                val=(pcode,)
                mycursor.execute(sql,val)
                originalprice=mycursor.fetchall()
                originalprice1=originalprice[0]
                originalprice=originalprice1[0]
-               print(price)
-               print(originalprice)
                profit=price-originalprice
                print("total profit" , profit)
                sql="insert into sales (salesid,salesdate,pcode,pprice,pqty)values(%s,%s,%s,%s,%s);"
@@ -206,17 +201,7 @@ def account_mgmt():
                                  editpwd()
                       if s== 4 : 
                         break
-
-def about_us():
-    while True :
-                      print("Our Aim is to manage stock ")
-                      s=int (input("\t\tEnter 1 to go back to Main Menu:"))
-                      if s== 1 :
-                        break                                 
-
-
-   
-
+def edituname():
 
 while True:
     print("\t\t\t STOCK MANAGEMENT")
@@ -224,8 +209,7 @@ while True:
     print("\t\t 1. PRODUCT MANAGEMENT")
     print("\t\t 2. SALES MANAGEMENT")
     print("\t\t 3. ACCOUNT SETTINGS")
-    print("\t\t 4. ABOUT US")
-    print("\t\t 5. EXIT\n")
+    print("\t\t 4. EXIT\n")
     n=int(input("Enter your choice :"))
     if n== 1:
         product_management()
@@ -234,6 +218,5 @@ while True:
     if n== 3:
         account_mgmt()
     if n== 4:
-        about_us()
-    if n== 5:
         break
+                       
