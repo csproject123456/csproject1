@@ -163,7 +163,7 @@ def saleitem():
                price=int(input("enter the price in which each quantity is to be sold:"))
                totalprice=price*qty
                print("Collect Rs:",totalprice)
-               salesdate=input("Enter the date in the format {day-month-year}:")
+               salesdate=input("Enter the date in the format {year-month-date}:")
                sql2="UPDATE product SET pqty=pqty-%s WHERE pcode=%s;"      
                val=(qty,pcode)
                mycursor.execute(sql2,val)
