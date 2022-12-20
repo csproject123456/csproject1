@@ -59,6 +59,7 @@ def product_management():
         if p == 5:
             break        
 def sales_mgmt( ):
+
            while True :
                       print("\t\t\t 1. Sale Items")
                       print("\t\t\t 2. List Sales")
@@ -189,20 +190,48 @@ def sale():
 
 def account_mgmt():
     while True :
-                      print("\t\t\t 1. Edit username")
-                      print("\t\t\t 2. Edit userid")
-                      print("\t\t\t 3. Edit password")
-                      print("\t\t\t 4. Back (Main Menu)")
-                      s=int (input("\t\tEnter Your Choice :"))
-                      if s== 1 :
-                                 edituname()
-                      if s== 2 :
-                                 edituid()
-                      if s== 3 :
-                                 editpwd()
-                      if s== 4 : 
-                        break
+        print("\t\t\t 1. Edit username")
+        print("\t\t\t 2. Edit password")
+        print("\t\t\t 3. Back (Main Menu)")
+        s=int (input("\t\tEnter Your Choice :"))
+        if s== 1 :
+            edituname()
+        if s== 2 :
+            editpwd()
+        if s== 3 : 
+            break
 def edituname():
+    i=int(input("Enter the uid for which username has to be changed:"))
+    k=int(input("Enter the new username:"))
+    sql="UPDATE user SET uname=%s where uid=%s;"
+    val=(k,i)
+    mydb.execute(sql,val)
+    myresult=mycursor.fetchall()
+    if myresult==[]:
+        print("Cannot find matching userid")
+    else:
+        print("Successfully changed")
+def editpwd():
+    i=int(input("Enter the uid for which password has to be changed:"))
+    j=int("Enter current password:")
+    sql="select upwd from user where uid=%s"
+    val=(i,)
+    mydb.execute(sql,val)
+    myresult=mycursor.fetchall
+    if myresult==j:
+        k=int(input("Enter the new password:"))
+        sql="UPDATE user SET upwd=%s where uid=%s;"
+        val=(k,i)
+        mydb.execute(sql,val)
+        myresult1=mycursor.fetchall()
+        if myresult1==[]:
+            print("Cannot find matching userid")
+        else:
+            print("Successfully changed")
+    else:
+        print("Password is incorrect")
+    
+    
 
 while True:
     print("\t\t\t STOCK MANAGEMENT")
