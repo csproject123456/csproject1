@@ -199,18 +199,16 @@ def account_mgmt():
             editpwd()
         if s== 3 : 
             break
-'''
-def edituname():
+def edituname():  
+    mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
+    mycursor=mydb.cursor()
     i=input("Enter the uid for which username has to be changed:")
     k=input("Enter the new username:")
     sql="UPDATE user SET uname=%s where uid=%s;"
     val=(k,i)
     mycursor.execute(sql,val)
-    myresult=mycursor.fetchall()
-    if myresult==[]:
-        print("Cannot find matching userid")
-    else:
-        print("Successfully changed")
+    mydb.commit()
+    print("Successfully changed")
 def editpwd():
     mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
     mycursor=mydb.cursor()
@@ -219,22 +217,19 @@ def editpwd():
     sql="select upwd from user where uid=%s;"
     val=(i,)
     mycursor.execute(sql,val)
-    myresult=mycursor.fetchall
-    if myresult==j:
-        k=input("Enter the new password:")
-        sql="UPDATE user SET upwd=%s where uid=%s;"
-        val=(k,i)
-        mycursor.execute(sql,val)
-        myresult1=mycursor.fetchall()
-        if myresult1==[]:
-            print("Cannot find matching userid")
-        else:
+    myresult=mycursor.fetchall()
+    for u in myresult:
+        if u[0]==j:
+            k=input("Enter the new password:")
+            sql="UPDATE user SET upwd=%s where uid=%s;"
+            val=(k,i)
+            mycursor.execute(sql,val)
+            mydb.commit()
+            myresult=mycursor.fetchall()
             print("Successfully changed")
-    else:
-        print("Password is incorrect")
-    
-'''
-
+            
+        else:
+            print("Password is incorrect")
 while True:
     print("\t\t\t STOCK MANAGEMENT")
     print("\t\t\t ****************\n")
