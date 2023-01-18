@@ -1,14 +1,13 @@
 import mysql.connector
 mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stocks")
-mycursor=mydb.cursor(buffered=True)
+mycursor=mydb.cursor
 
 def create_database():
     mydb = mysql.connector.connect(host='localhost',user='root',password='root',database='stocks')  # change as per system
     mycursor = mydb.cursor()
     mycursor.execute("CREATE TABLE if not exists product (pcode int(10) PRIMARY KEY,pname char(30) NOT NULL,pprice float(8,2) ,pqty int(10) ,pcat char(30));")
-    mycursor.execute("CREATE TABLE if not exists orders (orderid int(6)PRIMARY KEY,orderdate DATE ,pcode char(30) NOT NULL ,pprice float(8,2) ,pqty int(10) ,supplier char(50),pcat char(30));")      
     mycursor.execute("CREATE TABLE if not exists sales (salesid int(4) PRIMARY KEY ,salesdate DATE ,pcode char(30) references product(pcode),pprice float(8,2),pqty int(4));")
-    mycursor.execute("CREATE TABLE if not exists user (uid char(20) PRIMARY KEY,uname char(30) NOT NULL,upwd char(30));")  
+    mycursor.execute("CREATE TABLE if not exists user (uid char(40) PRIMARY KEY,uname char(30) NOT NULL,upwd char(30));")  
 create_database()
 print("\t\t\tWelcome\t\t\t")
 print("\t\t1.Create Account? ")
@@ -82,26 +81,18 @@ def sales_mgmt( ):
 def addproduct():
     mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
     mycursor=mydb.cursor()
-    pcode1=int(input("enter the product code:"))
-    sql=("select pcode from product where pcode=%s;")
-    val=(pcode1,)
-    mycursor.execute(sql,val)
-    myresult=mycursor.fetchall()
-    if myresult[0][0]!=pcode1:
-        pname=input("Enter the product name:")
-        pqty=int(input("Enter the quantity to buy"))
-        pprice=int(input("Enter the price of the product"))
-        pcat=input("Enter category:")
-        mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
-        mycursor=mydb.cursor()
-        sql="insert into product values(%s,%s,%s,%s,%s);"
-        data=(pcode1,pname,pprice,pqty,pcat)
-        mycursor.execute(sql,data)
-        mydb.commit()
-        print("Product  Added")
-    else:
-        print("Product Code already used")
-addproduct()
+    pcode1=int(input("enter the product code \n Product wont get added if entered product code is already in use:"))
+    pname=input("Enter the product name:")
+    pqty=int(input("Enter the quantity to buy"))
+    pprice=int(input("Enter the price of the product"))
+    pcat=input("Enter category:")
+    mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
+    mycursor=mydb.cursor()
+    sql="insert ignore into product values(%s,%s,%s,%s,%s);"
+    data=(pcode1,pname,pprice,pqty,pcat)
+    mycursor.execute(sql,data)
+    mydb.commit()
+    print("Product  Added")
 def modifyproduct():
     while True:
         print("Choose which data to be modified")
@@ -155,7 +146,7 @@ def listproduct():
     print("\t\t code\tname\tprice\tquantity\tcategory")
     print("\t\t","-"*46)
     for i in mycursor:
-        print("\t\t",i[0],"\t",i[1],"\t",i[2],"\t",i[3],"\t\t",i[4])
+        print("\t\t",i[0],"\t\t",i[1],"\t\t",i[2],"\t",i[3],"\t\t",i[4])
         print("\t\t","-"*46)
 def saleitem():
     mydb=mysql.connector.connect(host="localhost",user="root",password="root",database="stocks")
@@ -166,12 +157,12 @@ def saleitem():
     mycursor.execute(sql4,val4)
     x=mycursor.fetchall()
     print(x)
-    qty=int(input("Enter no of quantity to sell :"))
+    qty=input("Enter the quantity to sell :")
+    qty=int(qty)
     sql5="select pqty from product where pcode=%s;"
     val=(pcode,)
     mycursor.execute(sql5,val)
     qtycheck=mycursor.fetchall()
-    print("Original Price",qtycheck[0][0])
     for i in qtycheck:
         x=i
     for i in x:
@@ -179,41 +170,40 @@ def saleitem():
     if l<qty:
         print("Not enough quantity to sell")
     else:
-        salesid1=int(input("enter sales id:"))
-        sql=("select salesid from sales where salesid=%s;")
-        val=(salesid1,)
+        salesid1=int(input("enter sales id \n Sale wont be  added if sale id is already used:"))
+        price=int(input("enter the price in which each quantity is to be sold:"))
+        totalprice=price*qty
+        print("Collect Rs:",totalprice)
+        salesdate=input("Enter the date in the format {year-month-date}:")
+        sql2="UPDATE product SET pqty=pqty-%s WHERE pcode=%s;"      
+        val=(qty,pcode)
+        mycursor.execute(sql2,val)
+        print("successfully sold")
+        sql="select pprice from product where pcode=%s;" 
+        val=(pcode,)
+        mycursor.execute(sql,val)
+        originalprice=mycursor.fetchall()
+        originalprice1=originalprice[0]
+        originalprice=originalprice1[0]
+        profit=price-originalprice
+        print("total profit" , profit)
+        sql="insert ignore into sales (salesid,salesdate,pcode,pprice,pqty)values(%s,%s,%s,%s,%s);"
+        val=(salesid1,salesdate,pcode,price,qty)
         mycursor.execute(sql,val)
         mydb.commit()
-        myresult=mycursor.fetchall()
-        if myresult[0][0]!=salesid1:
-            price=int(input("enter the price in which each quantity is to be sold:"))
-            totalprice=price*qty
-            print("Collect Rs:",totalprice)
-            salesdate=input("Enter the date in the format {year-month-date}:")
-            sql2="UPDATE product SET pqty=pqty-%s WHERE pcode=%s;"      
-            val=(qty,pcode)
-            mycursor.execute(sql2,val)
-            print("successfully sold")
-            sql="select pprice from product where pcode=%s;" 
-            val=(pcode,)
-            mycursor.execute(sql,val)
-            originalprice=mycursor.fetchall()
-            originalprice1=originalprice[0]
-            originalprice=originalprice1[0]
-            profit=price-originalprice
-            print("total profit" , profit)
-            sql="insert into sales (salesid,salesdate,pcode,pprice,pqty)values(%s,%s,%s,%s,%s);"
-            val=(salesid1,salesdate,pcode,price,qty)
-            mycursor.execute(sql,val)
-            mydb.commit()
-        else:
-            print("Salesid already used")
+        
 def sale():
-    ask=int(input("Enter sale id"))
-    sql="select * from sales where salesid=%s;"
-    val=(ask,)
-    mycursor.execute(sql,val)
-    mydb.commit()
+    mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
+    mycursor=mydb.cursor()
+    sql="SELECT * from sales;"
+    mycursor.execute(sql)
+    print("\t\t\t\t SALES DETAILS")
+    print("\t\t","-"*46)
+    print("\t\t salesid\tsalesdate\tpcode\tsaleprice\tquantity")
+    print("\t\t","-"*46)
+    for i in mycursor:
+        print("\t\t",i[0],"\t\t",i[1],"\t",i[2],"\t",i[3],"\t\t",i[4])
+        print("\t\t","-"*46)
 
 def account_mgmt():
     while True :
@@ -231,21 +221,12 @@ def edituname():
     mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
     mycursor=mydb.cursor()
     i=input("Enter the uid for which username has to be changed:")
-    sql=("select uid from user where uid=%s")
-    val=(i,)
+    k=input("Enter the new username:")
+    sql="UPDATE user SET uname=%s where uid=%s;"
+    val=(k,i)
     mycursor.execute(sql,val)
-    myresult=mycursor.fetchall()
-    print(myresult[0][0])
     mydb.commit()
-    if myresult[0][0]==i:
-        k=input("Enter the new username:")
-        sql="UPDATE user SET uname=%s where uid=%s;"
-        val=(k,i)
-        mycursor.execute(sql,val)
-        mydb.commit()
-        print("Successfully changed")
-    else:
-        print("User id not found")
+    print("Successfully changed")
 def editpwd():
     mydb=mysql.connector.connect(host="localhost",user="root",passwd="root",database="stocks")
     mycursor=mydb.cursor()
@@ -283,4 +264,3 @@ while True:
         account_mgmt()
     if n== 4:
         break
-                       
